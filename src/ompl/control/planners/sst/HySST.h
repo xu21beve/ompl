@@ -339,6 +339,18 @@ namespace ompl
                     throw Exception("Selection radius (selectionRadius_) not set");
             }
 
+            /** \brief Set flow set sampler pointer */
+            void setFlowSetSampler(ompl::base::ValidStateSamplerPtr sampler)
+            {
+                flowSetSampler_ = sampler;
+            }
+
+            /** \brief Set jump set sampler pointer */
+            void setJumpSetSampler(ompl::base::ValidStateSamplerPtr sampler)
+            {
+                jumpSetSampler_ = sampler;
+            }
+
         protected:
             const static ompl::control::Control *getFlowControl(const ompl::control::Control *control)
             {
@@ -436,6 +448,12 @@ namespace ompl
                 }
                 return false;
             };
+
+            /// \brief Jump set sampler
+            base::ValidStateSamplerPtr jumpSetSampler_;
+
+            /// \brief Flow set sampler
+            base::ValidStateSamplerPtr flowSetSampler_;
 
             /// \brief Control Sampler
             control::DirectedControlSamplerPtr controlSampler_;

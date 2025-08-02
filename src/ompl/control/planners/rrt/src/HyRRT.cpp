@@ -80,8 +80,16 @@ void ompl::control::HyRRT::initTree(void)
 
 void ompl::control::HyRRT::randomSample(Motion *randomMotion)
 {
-    sampler_->sampleUniform(randomMotion->state);
-}
+    if ((double) random() / RAND_MAX > 0.5)
+    {   
+        si_->printState(randomMotion->state);
+        sampler_->sampleUniform(randomMotion->state);
+    }
+    else
+    {
+        jumpSetSampler_->sample(randomMotion->state);
+        si_->printState(randomMotion->state);
+    }}
 
 base::PlannerStatus ompl::control::HyRRT::solve(const base::PlannerTerminationCondition &ptc)
 {

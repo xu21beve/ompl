@@ -51,6 +51,7 @@
 #include "ompl/base/goals/GoalRegion.h"
 
 using namespace CommonMath;
+namespace ob = ompl::base;
 
 enum CollisionResult
 {
@@ -558,7 +559,7 @@ public:
     virtual bool isSatisfied(const ompl::base::State *st, double *distance) const
     {
         // perform any operations and return a truth value
-        std::vector<double> goal = {5, 3};
+        std::vector<double> goal = {5, 4};
         double distSqr = 0;
         for (int i = 0; i < 2; i++)
         {
@@ -583,6 +584,57 @@ public:
     }
 };
 
+class JumpSetSampler : public ompl::base::ValidStateSampler
+{
+public:
+    /** \brief Constructor */
+    JumpSetSampler(const ompl::control::SpaceInformation *si) : ompl::base::ValidStateSampler(si), sampler_(si->allocStateSampler()) 
+    {
+        name_ = "jump_set";
+    }
+
+    ~JumpSetSampler() override = default;
+
+    bool sample(ompl::base::State *state)
+    {
+        double randRect = (double) random() / RAND_MAX;
+        double randPos = (double) random() / RAND_MAX;
+        double x = (double) random() / RAND_MAX * 4 + 0.5;
+        double y = (double) random() / RAND_MAX * 1 + 1.5;
+
+        std::vector<double> paddleCoord, statePos;
+
+        if (randRect < 0.33)   // Iterate from 0->1 with intervals of 0.2 (for 5 paddles)
+            y = 2.5;
+        else if (randRect < 0.66)
+            y = 1.5;
+        else
+            x = 0.5;
+
+        auto *values = state->as<ompl::base::CompoundState>()->as<ompl::base::RealVectorStateSpace::StateType>(0)->values;
+        values[0] = x;
+        values[1] = y;
+
+        return true;
+    }
+
+    bool sampleNear(ompl::base::State *state, const ompl::base::State *near, double distance)
+    {
+        return false;
+    };
+
+protected:
+    /** \brief The sampler to build upon */
+    ompl::base::StateSamplerPtr sampler_;
+    // ompl::base::SpaceInformationPtr si_;
+};
+
+ob::StateSamplerPtr allocHybridSpaceStateSampler(ob::StateSpace *ss, ob::StateSamplerPtr flowSetSampler)
+{
+    return std::make_shared<const ob::CompoundStateSampler>(flowSetSampler, new JumpSetSampler(new ob::SpaceInformation(ss)));
+}
+
+
 int main()
 {
     // Set the bounds of space
@@ -606,9 +658,9 @@ int main()
 
     ompl::base::RealVectorBounds flowBounds(2);
     flowBounds.setLow(0, -0.5);
-    flowBounds.setLow(1, -2);
-    flowBounds.setHigh(0, 2);
-    flowBounds.setHigh(1, 2);
+    flowBounds.setLow(1, -1);
+    flowBounds.setHigh(0, 1);
+    flowBounds.setHigh(1, 1);
     flowControlSpace->setBounds(flowBounds);
 
     ompl::base::RealVectorBounds jumpBounds(2);
@@ -633,6 +685,7 @@ int main()
     ompl::control::ControlSpacePtr flowControlSpacePtr(flowControlSpace);
     ompl::control::ControlSpacePtr jumpControlSpacePtr(jumpControlSpace);
 
+    hybridSpacePtr->setStateSamplerAllocator(allocJumpSetSampler(new ompl::control::SpaceInformation(hybridSpacePtr, controlSpacePtr)));
     ompl::control::CompoundControlSpace *controlSpace = new ompl::control::CompoundControlSpace(hybridSpacePtr);
     controlSpace->addSubspace(flowControlSpacePtr);
     controlSpace->addSubspace(jumpControlSpacePtr);
@@ -644,7 +697,7 @@ int main()
     ompl::control::ODESolverPtr odeSolver(new ompl::control::ODEBasicSolver<>(si, &flowODE));
 
     si->setStatePropagator(ompl::control::ODESolver::getStatePropagator(odeSolver));
-    si->setPropagationStepSize(0.05);
+    si->setPropagationStepSize(0.02);
     si->setMinMaxControlDuration(1, 1);
 
     si->setup();
@@ -689,12 +742,12 @@ int main()
     cHySST.setFlowSet(flowSet);
     cHySST.setJumpSet(jumpSet);
     cHySST.setTm(1);
-    cHySST.setFlowStepDuration(0.05);
+    cHySST.setFlowStepDuration(0.02);
     cHySST.setUnsafeSet(unsafeSet);
     cHySST.setCollisionChecker(collisionChecker);
     cHySST.setSelectionRadius(0.2);
     cHySST.setPruningRadius(0.1);
-    cHySST.setBatchSize(1); 
+    cHySST.setJumpSetSampler(allocJumpSetSampler(new ompl::control::SpaceInformation(hybridSpacePtr, controlSpacePtr)));
 
 
     // attempt to solve the planning problem within 200 seconds

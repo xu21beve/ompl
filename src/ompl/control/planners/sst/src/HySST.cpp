@@ -310,7 +310,25 @@ std::vector<ompl::control::HySST::Motion *> ompl::control::HySST::extend(Motion 
 
 void ompl::control::HySST::randomSample(Motion *randomMotion)
 {
-    sampler_->sampleUniform(randomMotion->state);
+    auto flowSetSampler = flowSetSampler_ ? flowSetSampler_ : sampler_;
+    auto jumpSetSampler = sampler_;
+
+    // Intended to allow for sampling in a zero-measure flow/jump set
+    if (flowSetSampler_ && jumpSetSampler_)
+    {
+        flowSetSampler = flowSetSampler_
+    }
+    else if (flowSetSampler_)   // If only flowSetSampler_ has been initialized
+    {
+        if ((double) random() / RAND_MAX > 0.5) 
+            flowSetSampler_->sample(randomMotion->state);
+        else
+            sampler_->sampleUniform(randomMotion->state);
+    }
+    else
+    {
+        sampler_->sampleUniform(randomMotion->state);
+    }
 }
 
 ompl::base::PlannerStatus ompl::control::HySST::solve(const base::PlannerTerminationCondition &ptc)
@@ -528,6 +546,12 @@ ompl::base::PlannerStatus ompl::control::HySST::constructSolution(Motion *last_m
 
     // Add the solution path to the problem definition
     pdef_->addSolutionPath(path, finalDistance > 0.0, finalDistance, getName());
+    
+    for (Motion *motion : trajectory)
+    {
+        auto *state_values = motion->state->as<ompl::base::HybridStateSpace::StateType>()->as<ompl::base::RealVectorStateSpace::StateType>(0)->values;
+        std::cout << state_values[0] << " " << state_values[1] << std::endl;
+    }
     OMPL_INFORM("%s: Created %u states", getName().c_str(), nn_->size());
 
     // Return a status indicating that an exact solution has been found

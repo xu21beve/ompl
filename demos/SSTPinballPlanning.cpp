@@ -14,7 +14,7 @@
  *     copyright notice, this list of conditions and the following
  *     disclaimer in the documentation and/or other materials provided
  *     with the distribution.
- *   * Neither the name of the University of Santa Cruz nor the names of 
+ *   * Neither the name of the University of Santa Cruz nor the names of
  *     its contributors may be used to endorse or promote products derived
  *     from this software without specific prior written permission.
  *
@@ -41,8 +41,8 @@
 #include "ompl/control/ODESolver.h"
 #include "ompl/base/objectives/StateCostIntegralObjective.h"
 
-
-struct PinballSetup {
+struct PinballSetup
+{
     double paddleLength = 1;
     double paddleWidth = 0.25;
     std::vector<std::vector<double>> paddleCoords = {{1, -1}, {2.5, -4}, {1.5, -5}, {3, -7}, {1, -8}};
@@ -58,7 +58,7 @@ double distanceFunc(ompl::base::State *state1, ompl::base::State *state2)
 }
 
 /** \brief Individual jump set for a paddle. */
-bool inPaddle(ompl::control::HySST::Motion *motion, std::vector<double> paddleCoord) 
+bool inPaddle(ompl::control::HySST::Motion *motion, std::vector<double> paddleCoord)
 {
     PinballSetup pinballSetup;
 
@@ -128,7 +128,7 @@ bool unsafeSet(ompl::control::HySST::Motion *motion)
 void flowODE(const ompl::control::ODESolver::StateType &q, const ompl::control::Control *c,
              ompl::control::ODESolver::StateType &qdot)
 {
-    (void)c;    // No conrol is applied when a state is in the flow set
+    (void)c;    // No control is applied when a state is in the flow set
 
     // Retrieve the current orientation of the multicopter.
     const double v_1 = q[2];
@@ -182,7 +182,7 @@ ompl::base::State *discreteSimulator(ompl::base::State *x_cur, const ompl::contr
         new_state->as<ompl::base::HybridStateSpace::StateType>()->as<ompl::base::RealVectorStateSpace::StateType>(0)->values[2] = -(v1 * 0.6 + std::copysign(u_x, v1)); // Input is in the same direction as rebound
         new_state->as<ompl::base::HybridStateSpace::StateType>()->as<ompl::base::RealVectorStateSpace::StateType>(0)->values[3] = v2;
     }
-    
+
     // The position and acceleration doesn't change
     new_state->as<ompl::base::HybridStateSpace::StateType>()->as<ompl::base::RealVectorStateSpace::StateType>(0)->values[0] = x1;
     new_state->as<ompl::base::HybridStateSpace::StateType>()->as<ompl::base::RealVectorStateSpace::StateType>(0)->values[1] = x2;
@@ -198,9 +198,9 @@ public:
     EuclideanGoalRegion(const ompl::base::SpaceInformationPtr &si) : ompl::base::Goal(si) {}
 
     virtual bool isSatisfied(const ompl::base::State *st, double *distance) const
-    {        
+    {
         // perform any operations and return a truth value
-        std::vector<double> goalRegion = {1, 4, -10};    // x-min, x-max, y
+        std::vector<double> goalRegion = {1, 4, -10};  // x-min, x-max, y
         auto *values = st->as<ompl::base::CompoundState>()->as<ompl::base::RealVectorStateSpace::StateType>(0)->values;
 
         if (values[0] > goalRegion[1])
@@ -209,7 +209,7 @@ public:
             *distance = hypot(values[1] + 10, values[0] - goalRegion[0]);
         else
             *distance = values[1] + 10;
-        
+
         return values[0] >= goalRegion[0] && values[0] <= goalRegion[1] && values[1] <= goalRegion[2];
     }
 
@@ -236,9 +236,79 @@ public:
     ompl::base::Cost motionCost(const ompl::base::State *s1, const ompl::base::State *s2) const
     {
         return ompl::base::Cost((stateCost(s1).value() + stateCost(s2).value()) * 0.5 * 
-                                    (ompl::base::HybridStateSpace::getStateTime(s2) - ompl::base::HybridStateSpace::getStateTime(s1)));
+            (ompl::base::HybridStateSpace::getStateTime(s2) - ompl::base::HybridStateSpace::getStateTime(s1)));
     }
 };
+
+class JumpSetSampler : public ompl::base::ValidStateSampler
+{
+public:
+    /** \brief Constructor */
+    JumpSetSampler(const ompl::control::SpaceInformation *si) : ompl::base::ValidStateSampler(si), sampler_(si->allocStateSampler()) 
+    {
+        name_ = "jump_set";
+    }
+
+    ~JumpSetSampler() override = default;
+
+    bool sample(ompl::base::State *state)
+    {
+        double randPaddle = (double) random() / RAND_MAX;
+        double randPos = (double) random() / RAND_MAX;
+
+        std::vector<double> paddleCoord, statePos;
+        PinballSetup pinballSetup;
+
+        double i = 1;
+        while (i < 6)
+        {
+            if (randPaddle < i * 0.2)   // Iterate from 0->1 with intervals of 0.2 (for 5 paddles)
+            {
+                paddleCoord = pinballSetup.paddleCoords[i - 1];
+                break;
+            }
+            i++;
+        }
+        
+        if (random() % 2 == 0) // Set initial state position either to the top left or bottom right corner of the paddle
+        {
+            statePos = paddleCoord;
+            if (random() % 2 == 0)
+                statePos[0] += randPos * pinballSetup.paddleWidth;
+            else
+                statePos[1] += randPos * pinballSetup.paddleLength;
+        }
+        else
+        {
+            statePos = {paddleCoord[0] + pinballSetup.paddleLength, paddleCoord[0] + pinballSetup.paddleWidth};
+            if (random() % 2 == 0)
+                statePos[0] -= randPos * pinballSetup.paddleWidth;
+            else
+                statePos[1] -= randPos * pinballSetup.paddleLength;
+        }
+
+        auto *values = state->as<ompl::base::CompoundState>()->as<ompl::base::RealVectorStateSpace::StateType>(0)->values;
+        values[0] = statePos[0];
+        values[1] = statePos[1];
+
+        return true;
+    }
+
+    bool sampleNear(ompl::base::State *state, const ompl::base::State *near, double distance)
+    {
+        return false;
+    };
+
+protected:
+    /** \brief The sampler to build upon */
+    ompl::base::StateSamplerPtr sampler_;
+    // ompl::base::SpaceInformationPtr si_;
+};
+
+ompl::base::ValidStateSamplerPtr allocJumpSetSampler(const ompl::control::SpaceInformation *si)
+{
+    return std::make_shared<JumpSetSampler>(si);
+}
 
 int main()
 {
@@ -291,11 +361,11 @@ int main()
     // Construct a space information instance for this state space
     ompl::control::SpaceInformationPtr si(new ompl::control::SpaceInformation(hybridSpacePtr, controlSpacePtr));
     ompl::control::ODESolverPtr odeSolver (new ompl::control::ODEBasicSolver<> (si, &flowODE));
-    
+
     si->setStatePropagator(ompl::control::ODESolver::getStatePropagator(odeSolver));
     si->setPropagationStepSize(0.01);
     si->setup();
-    
+
     // Create a problem instance
     ompl::base::ProblemDefinitionPtr pdef(new ompl::base::ProblemDefinition(si));
 
@@ -305,7 +375,7 @@ int main()
     std::vector<ompl::base::ScopedState<>> startStates;
     std::vector<double> startXs = {0.5, 1, 2, 3.5, 4, 4.5};
 
-    for (std::size_t i = 0; i < startXs.size(); i++) 
+    for (std::size_t i = 0; i < startXs.size(); i++)
     {
         startStates.push_back(ompl::base::ScopedState<>(hybridSpacePtr));
         startStates.back()->as<ompl::base::HybridStateSpace::StateType>()->as<ompl::base::RealVectorStateSpace::StateType>(0)->values[0] = startXs[i];
@@ -322,7 +392,7 @@ int main()
 
     // Set the goal region
     pdef->setGoal(goal);
-    
+
     // Create velocity optimization objective instance
     ompl::base::OptimizationObjectivePtr velObj(new VelocityObjective(si));
     // pdef->setOptimizationObjective(velObj);
@@ -347,7 +417,7 @@ int main()
 
     // attempt to solve the planning problem within 200 seconds
     ompl::time::point t0 = ompl::time::now();
-    ompl::base::PlannerStatus solved = cHySST.solve(ompl::base::timedPlannerTerminationCondition(30));
+    ompl::base::PlannerStatus solved = cHySST.solve(ompl::base::timedPlannerTerminationCondition(15));
     double planTime = ompl::time::seconds(ompl::time::now() - t0);
 
     if (solved)  // If either approximate or exact solution has beenf ound

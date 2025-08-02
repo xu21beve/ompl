@@ -16,49 +16,49 @@ if (OMPL_BUILD_DEMOS)
             Boost::program_options)
     endmacro(add_ompl_demo)
 
-
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
     add_ompl_demo(demo_SSTPinballPlanning SSTPinballPlanning.cpp)
-    add_ompl_demo(demo_PinballPlanning PinballPlanning.cpp)
-    add_ompl_demo(demo_BouncingBallPlanning BouncingBallPlanning.cpp)    
-    add_ompl_demo(demo_RigidBodyPlanning RigidBodyPlanning.cpp)
-    add_ompl_demo(demo_RigidBodyPlanningWithIK RigidBodyPlanningWithIK.cpp)
-    add_ompl_demo(demo_RigidBodyPlanningWithControls RigidBodyPlanningWithControls.cpp)
-    add_ompl_demo(demo_RigidBodyPlanningWithIntegrationAndControls RigidBodyPlanningWithIntegrationAndControls.cpp)
-    add_ompl_demo(demo_RigidBodyPlanningWithODESolverAndControls RigidBodyPlanningWithODESolverAndControls.cpp)
-    add_ompl_demo(demo_StateSampling StateSampling.cpp)
-    add_ompl_demo(demo_GeometricCarPlanning GeometricCarPlanning.cpp)
-    add_ompl_demo(demo_DubinsAirplane DubinsAirplane.cpp)
-    add_ompl_demo(demo_Point2DPlanning Point2DPlanning.cpp)
-    add_ompl_demo(demo_HybridSystemPlanning HybridSystemPlanning.cpp)
-    add_ompl_demo(demo_KinematicChainBenchmark KinematicChainBenchmark.cpp)
-    add_ompl_demo(demo_HypercubeBenchmark HypercubeBenchmark.cpp)
-    aux_source_directory(Koules Koules_SRC)
-    add_ompl_demo(demo_Koules ${Koules_SRC})
-    add_ompl_demo(demo_PlannerData PlannerData.cpp)
-    add_ompl_demo(demo_ThunderLightning ThunderLightning.cpp)
+    # add_ompl_demo(demo_PinballPlanning PinballPlanning.cpp)
+    # add_ompl_demo(demo_BouncingBallPlanning BouncingBallPlanning.cpp)    
+    # add_ompl_demo(demo_RigidBodyPlanning RigidBodyPlanning.cpp)
+    # add_ompl_demo(demo_RigidBodyPlanningWithIK RigidBodyPlanningWithIK.cpp)
+    # add_ompl_demo(demo_RigidBodyPlanningWithControls RigidBodyPlanningWithControls.cpp)
+    # add_ompl_demo(demo_RigidBodyPlanningWithIntegrationAndControls RigidBodyPlanningWithIntegrationAndControls.cpp)
+    # add_ompl_demo(demo_RigidBodyPlanningWithODESolverAndControls RigidBodyPlanningWithODESolverAndControls.cpp)
+    # add_ompl_demo(demo_StateSampling StateSampling.cpp)
+    # add_ompl_demo(demo_GeometricCarPlanning GeometricCarPlanning.cpp)
+    # add_ompl_demo(demo_DubinsAirplane DubinsAirplane.cpp)
+    # add_ompl_demo(demo_Point2DPlanning Point2DPlanning.cpp)
+    # add_ompl_demo(demo_HybridSystemPlanning HybridSystemPlanning.cpp)
+    # add_ompl_demo(demo_KinematicChainBenchmark KinematicChainBenchmark.cpp)
+    # add_ompl_demo(demo_HypercubeBenchmark HypercubeBenchmark.cpp)
+    # aux_source_directory(Koules Koules_SRC)
+    # add_ompl_demo(demo_Koules ${Koules_SRC})
+    # add_ompl_demo(demo_PlannerData PlannerData.cpp)
+    # add_ompl_demo(demo_ThunderLightning ThunderLightning.cpp)
     
-    add_ompl_demo(demo_OptimalPlanning OptimalPlanning.cpp)
-    add_ompl_demo(demo_PlannerProgressProperties PlannerProgressProperties.cpp)
-    add_ompl_demo(demo_CForestCircleGridBenchmark CForestCircleGridBenchmark.cpp)
+    # add_ompl_demo(demo_OptimalPlanning OptimalPlanning.cpp)
+    # add_ompl_demo(demo_PlannerProgressProperties PlannerProgressProperties.cpp)
+    # add_ompl_demo(demo_CForestCircleGridBenchmark CForestCircleGridBenchmark.cpp)
     
-    add_ompl_demo(demo_Diagonal Diagonal.cpp)
+    # add_ompl_demo(demo_Diagonal Diagonal.cpp)
     
-    add_ompl_demo(demo_VectorFieldConservative VFRRT/VectorFieldConservative.cpp)
-    add_ompl_demo(demo_VectorFieldNonconservative VFRRT/VectorFieldNonconservative.cpp)
+    # add_ompl_demo(demo_VectorFieldConservative VFRRT/VectorFieldConservative.cpp)
+    # add_ompl_demo(demo_VectorFieldNonconservative VFRRT/VectorFieldNonconservative.cpp)
     
-    add_ompl_demo(demo_ConstrainedPlanningSphere constraint/ConstrainedPlanningSphere.cpp)
-    add_ompl_demo(demo_ConstrainedPlanningTorus constraint/ConstrainedPlanningTorus.cpp)
-    add_ompl_demo(demo_ConstrainedPlanningImplicitChain constraint/ConstrainedPlanningImplicitChain.cpp)
-    add_ompl_demo(demo_ConstrainedPlanningImplicitParallel constraint/ConstrainedPlanningImplicitParallel.cpp)
-    add_ompl_demo(demo_ConstrainedPlanningKinematicChain constraint/ConstrainedPlanningKinematicChain.cpp)
+    # add_ompl_demo(demo_ConstrainedPlanningSphere constraint/ConstrainedPlanningSphere.cpp)
+    # add_ompl_demo(demo_ConstrainedPlanningTorus constraint/ConstrainedPlanningTorus.cpp)
+    # add_ompl_demo(demo_ConstrainedPlanningImplicitChain constraint/ConstrainedPlanningImplicitChain.cpp)
+    # add_ompl_demo(demo_ConstrainedPlanningImplicitParallel constraint/ConstrainedPlanningImplicitParallel.cpp)
+    # add_ompl_demo(demo_ConstrainedPlanningKinematicChain constraint/ConstrainedPlanningKinematicChain.cpp)
     
-    add_ompl_demo(demo_MultiLevelPlanningRigidBody2D multilevel/MultiLevelPlanningRigidBody2D.cpp)
-    add_ompl_demo(demo_MultiLevelPlanningRigidBody3D multilevel/MultiLevelPlanningRigidBody3D.cpp)
-    add_ompl_demo(demo_MultiLevelPlanningKinematicChain multilevel/MultiLevelPlanningKinematicChain.cpp)
-    add_ompl_demo(demo_MultiLevelPlanningHyperCube multilevel/MultiLevelPlanningHyperCube.cpp)
-    add_ompl_demo(demo_MultiLevelPlanningHyperCubeBenchmark multilevel/MultiLevelPlanningHyperCubeBenchmark.cpp)
+    # add_ompl_demo(demo_MultiLevelPlanningRigidBody2D multilevel/MultiLevelPlanningRigidBody2D.cpp)
+    # add_ompl_demo(demo_MultiLevelPlanningRigidBody3D multilevel/MultiLevelPlanningRigidBody3D.cpp)
+    # add_ompl_demo(demo_MultiLevelPlanningKinematicChain multilevel/MultiLevelPlanningKinematicChain.cpp)
+    # add_ompl_demo(demo_MultiLevelPlanningHyperCube multilevel/MultiLevelPlanningHyperCube.cpp)
+    # add_ompl_demo(demo_MultiLevelPlanningHyperCubeBenchmark multilevel/MultiLevelPlanningHyperCubeBenchmark.cpp)
 
-    add_ompl_demo(demo_SpaceTimePlanning SpaceTimePlanning.cpp)
+    # add_ompl_demo(demo_SpaceTimePlanning SpaceTimePlanning.cpp)
 
     find_package(yaml-cpp CONFIG)
     set_package_properties(yaml-cpp PROPERTIES
@@ -82,25 +82,25 @@ if (OMPL_BUILD_DEMOS)
                     multicopter/MulticopterPlanning.cpp
                     multicopter/Quartic.cpp)
 
-        add_ompl_demo(demo_PlanarManipulator
-            PlanarManipulator/PlanarManipulatorDemo.cpp
-            PlanarManipulator/PlanarManipulator.cpp
-            PlanarManipulator/PolyWorld.cpp
-        )
-        target_link_libraries(demo_PlanarManipulator PRIVATE yaml-cpp::yaml-cpp)
+        # add_ompl_demo(demo_PlanarManipulator
+        #     PlanarManipulator/PlanarManipulatorDemo.cpp
+        #     PlanarManipulator/PlanarManipulator.cpp
+        #     PlanarManipulator/PolyWorld.cpp
+        # )
+        # target_link_libraries(demo_PlanarManipulator PRIVATE yaml-cpp::yaml-cpp)
 
-        add_ompl_demo(demo_MultiLevelPlanarManipulator
-            multilevel/MultiLevelPlanarManipulatorDemo.cpp
-            PlanarManipulator/PlanarManipulator.cpp
-            PlanarManipulator/PolyWorld.cpp
-        )
-        target_link_libraries(demo_MultiLevelPlanarManipulator PRIVATE yaml-cpp::yaml-cpp)
+        # add_ompl_demo(demo_MultiLevelPlanarManipulator
+        #     multilevel/MultiLevelPlanarManipulatorDemo.cpp
+        #     PlanarManipulator/PlanarManipulator.cpp
+        #     PlanarManipulator/PolyWorld.cpp
+        # )
+        # target_link_libraries(demo_MultiLevelPlanarManipulator PRIVATE yaml-cpp::yaml-cpp)
     endif()
 
-    if (OMPL_EXTENSION_TRIANGLE)
-        add_ompl_demo(demo_TriangulationDemo TriangulationDemo.cpp)
-        add_ompl_demo(demo_LTLWithTriangulation LTLWithTriangulation.cpp)
-    endif()
+    # if (OMPL_EXTENSION_TRIANGLE)
+    #     add_ompl_demo(demo_TriangulationDemo TriangulationDemo.cpp)
+    #     add_ompl_demo(demo_LTLWithTriangulation LTLWithTriangulation.cpp)
+    # endif()
 endif(OMPL_BUILD_DEMOS)
 
 file(GLOB OMPL_DEMO_PY_FILES "*.py")
